@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 require("dotenv").config();
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const port = process.env.PORT || 5000;
 
 app.use(cors({}));
@@ -28,7 +28,7 @@ async function run() {
     await client.connect();
     //database collections
     const usersCollection = client.db("nutriglow").collection("users");
-    const cartsCollection = client.db('nutriglow').collection('carts');
+    const cartsCollection = client.db("nutriglow").collection("carts");
     //save user data
     app.post("/users", async (req, res) => {
       try {
@@ -46,22 +46,24 @@ async function run() {
     });
     //gets users
     app.get("/users", async (req, res) => {
-      const result = await usersCollection.find().toArray();
+      const email = req.query.email;
+      const query = {'userData.email' : email};
+      const result = await usersCollection.find(query).toArray();
       res.send(result);
     });
     //get cart
-    app.get('/cart', async(req, res) => {
-        const email = req.query.email;
-        const query = {email : email}
-        const result = await cartsCollection.find(query).toArray();
-        res.send(result)
-    })
+    app.get("/cart", async (req, res) => {
+      const email = req.query.email;
+      const query = { email: email };
+      const result = await cartsCollection.find(query).toArray();
+      res.send(result);
+    });
     //post cart
-    app.post('/cart', async(req, res) => {
-        const cart = req.body;
-        const result = cartsCollection.insertOne(cart);
-        res.send(result)
-    })
+    app.post("/cart", async (req, res) => {
+      const cart = req.body;
+      const result = cartsCollection.insertOne(cart);
+      res.send(result);
+    });
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
