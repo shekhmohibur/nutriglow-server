@@ -31,23 +31,38 @@ async function run() {
     const cartsCollection = client.db("nutriglow").collection("carts");
     //save user data
     app.post("/users", async (req, res) => {
+      const user = req.body;
+      const email = user?.userData?.email;
+
       try {
-        const user = req.body;
-        const query = { email: user.email };
-        const existUser = await usersCollection.findOne(query);
+        const existUser = await usersCollection.findOne({
+          "userData.email": email,
+        });
+
         if (existUser) {
-          return res.send({ message: "User Already Exits", insurtedId: null });
+          return res.status(409).send({
+            message: "User Already Exists",
+            insertedId: null,
+          });
         }
+
         const result = await usersCollection.insertOne(user);
-        res.send(result);
+
+        res.status(201).send(result);
       } catch (err) {
-        res.send(500).send({ message: "failed to add user" });
+        res.status(500).send({
+          message: "Failed to add user",
+          error: err.message,
+        });
       }
     });
     //gets users
     app.get("/users", async (req, res) => {
       const email = req.query.email;
-      const query = {'userData.email' : email};
+      const query = {};
+      if (email) {
+        const query = { "userData.email": email };
+      }
       const result = await usersCollection.find(query).toArray();
       res.send(result);
     });
