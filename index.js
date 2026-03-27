@@ -65,12 +65,23 @@ async function run() {
     //gets users
     app.get("/users", async (req, res) => {
       const email = req.query.email;
-      const query = {};
+
+      let query = {};
+
       if (email) {
-        const query = { "userData.email": email };
+        query = { "userData.email": email };
       }
-      const result = await usersCollection.find(query).toArray();
-      res.send(result);
+
+      try {
+        const result = await usersCollection.find(query).toArray();
+
+        res.send(result);
+      } catch (err) {
+        res.status(500).send({
+          message: "Failed to get users",
+          error: err.message,
+        });
+      }
     });
     //get cart
     app.get("/cart", async (req, res) => {
