@@ -5,7 +5,13 @@ require("dotenv").config();
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const port = process.env.PORT || 5000;
 
-app.use(cors({}));
+app.use(
+  cors({
+    origin: ["https://nutriglowv1.vercel.app", "http://localhost:5173"],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+  }),
+);
 app.use(express.json());
 
 app.get("/", (req, res) => {
@@ -89,6 +95,10 @@ async function run() {
 }
 run().catch(console.dir);
 
-app.listen(port, () => {
-  console.log(`app listening on port ${port}`);
-});
+if (process.env.NODE_ENV !== "production") {
+  app.listen(port, () => {
+    console.log(`app listening on port ${port}`);
+  });
+}
+
+module.exports = app;
